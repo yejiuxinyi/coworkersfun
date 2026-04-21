@@ -5,3 +5,6 @@ dist/
 .vite/
 .omc/
 .claude/
+.env
+.env.local
+.vercel/
