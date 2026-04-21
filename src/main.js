@@ -1,12 +1,14 @@
 import { state, loadData, aggregateAnswers, persistCollected } from './state.js';
-import { drawCard } from './draw.js';
+import { drawFive } from './draw.js';
 import { renderQuiz } from './quiz.js';
 import { renderCard } from './card.js';
 import { renderPokedex } from './pokedex.js';
-import { sharePoster } from './share.js';
+import { renderReveal, loadSavedReveal, clearSavedReveal } from './reveal.js';
 import { renderAdmin } from './admin.js';
 
 const app = document.getElementById('app');
+
+let currentReveal = null;
 
 function renderHome() {
   if (location.hash) {
@@ -14,30 +16,54 @@ function renderHome() {
   }
   app.innerHTML = `
     <div class="home">
-      <h1 class="title">今天你会遇到<br/>什么老板/同事？</h1>
-      <p class="sub">5道玄学小问题，抽出你今日命定的那一位</p>
+      <div class="home-deco">🎲 🃏 🎯</div>
+      <h1 class="title">今日出战<br/>什么老板 / 同事？</h1>
+      <p class="sub">答 5 道玄学小问 · 开 5 连盲盒</p>
       <button id="start-btn" class="primary">开始抽卡</button>
-      <button id="pokedex-btn" class="ghost">查看卡池 (${state.collected.size}/${state.cards.length})</button>
+      <button id="pokedex-btn" class="ghost">📦 卡包 ${state.collected.size} / ${state.cards.length}</button>
+      ${currentReveal ? '<button id="resume-btn" class="ghost">↩ 回到上一组 5 连</button>' : ''}
     </div>
   `;
   document.querySelector('#start-btn').addEventListener('click', () => {
+    clearSavedReveal();
+    currentReveal = null;
     renderQuiz(app, onQuizDone);
   });
   document.querySelector('#pokedex-btn').addEventListener('click', () => {
     renderPokedex(app, renderHome);
   });
+  const resume = document.querySelector('#resume-btn');
+  if (resume) resume.addEventListener('click', () => enterReveal(currentReveal));
+}
+
+function enterReveal(ctx) {
+  currentReveal = ctx;
+  renderReveal(app, ctx, {
+    onSingle: (card) => {
+      renderCard(app, card, {
+        onBack: () => enterReveal(ctx),
+        onAgain: () => {
+          clearSavedReveal();
+          currentReveal = null;
+          renderQuiz(app, onQuizDone);
+        },
+        onPokedex: () => renderPokedex(app, () => enterReveal(ctx))
+      });
+    },
+    onAgain: () => {
+      clearSavedReveal();
+      currentReveal = null;
+      renderQuiz(app, onQuizDone);
+    },
+    onPokedex: () => renderPokedex(app, () => enterReveal(ctx))
+  });
 }
 
 function onQuizDone(answers) {
   const { luckScore, tags } = aggregateAnswers(answers, state.questions);
-  const card = drawCard({ cards: state.cards, tags, luckScore });
-  state.currentCard = card;
-  persistCollected(card.id);
-  renderCard(app, card, {
-    onShare: sharePoster,
-    onDrawAgain: () => renderQuiz(app, onQuizDone),
-    onPokedex: () => renderPokedex(app, renderHome)
-  });
+  const cards = drawFive({ cards: state.cards, tags, luckScore });
+  cards.forEach(c => persistCollected(c.id));
+  enterReveal({ cards, revealed: new Array(cards.length).fill(false) });
 }
 
 function route() {
@@ -54,12 +80,14 @@ function route() {
 window.addEventListener('hashchange', route);
 
 (async function init() {
-  app.innerHTML = '<p>加载中…</p>';
+  app.innerHTML = '<div class="home"><p>加载中…</p></div>';
   try {
     await loadData();
   } catch (err) {
-    app.innerHTML = `<div class="home"><h2>加载失败</h2><p>${err.message}</p><p>请检查后端服务是否启动。</p></div>`;
+    app.innerHTML = `<div class="home"><h2>加载失败</h2><p class="err">${err.message}</p><p>请检查后端服务是否启动。</p></div>`;
     return;
   }
+  const saved = loadSavedReveal();
+  if (saved) currentReveal = saved;
   route();
 })();

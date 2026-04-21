@@ -48,3 +48,18 @@ export function drawCard({ cards, tags, luckScore, random = Math.random }) {
 
   return pickFromRarity(cards, 'R', random, excludeDestined);
 }
+
+export function drawFive({ cards, tags, luckScore, random = Math.random }) {
+  const result = [];
+  for (let i = 0; i < 5; i++) {
+    result.push(drawCard({ cards, tags, luckScore, random }));
+  }
+  if (result.every(c => c.rarity === 'R')) {
+    const upgradePool = cards.filter(c => c.rarity === 'SR' || c.rarity === 'SSR');
+    if (upgradePool.length > 0) {
+      const replaceIdx = Math.floor(random() * 5);
+      result[replaceIdx] = upgradePool[Math.floor(random() * upgradePool.length)];
+    }
+  }
+  return result;
+}

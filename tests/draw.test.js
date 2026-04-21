@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { drawCard, computeRarityPool, isDestinedHit } from '../src/draw.js';
+import { drawCard, drawFive, computeRarityPool, isDestinedHit } from '../src/draw.js';
 
 const mockCards = [
   { id: 'R001', rarity: 'R', type: 'roast', role: 'leader', name: 'R1' },
@@ -87,5 +87,45 @@ describe('drawCard', () => {
     });
     expect(card.rarity).toBe('SSR');
     expect(card.id).not.toBe('SSR001');
+  });
+});
+
+describe('drawFive', () => {
+  it('returns exactly 5 cards', () => {
+    const result = drawFive({
+      cards: mockCards,
+      tags: new Set(),
+      luckScore: 0,
+      random: () => 0.5
+    });
+    expect(result).toHaveLength(5);
+  });
+
+  it('guarantees at least one non-R when all 5 would be R', () => {
+    // random always returns 0.10 → always picks R rarity slice
+    const result = drawFive({
+      cards: mockCards,
+      tags: new Set(),
+      luckScore: 0,
+      random: () => 0.10
+    });
+    const nonR = result.filter(c => c.rarity !== 'R');
+    expect(nonR.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('does not force replace when at least one non-R already present', () => {
+    // Alternate 0.10 (R) and 0.80 (SR) so some come back as SR naturally
+    let i = 0;
+    const seq = [0.10, 0.10, 0.80, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10];
+    const random = () => seq[i++ % seq.length];
+    const result = drawFive({
+      cards: mockCards,
+      tags: new Set(),
+      luckScore: 0,
+      random
+    });
+    const rarities = result.map(c => c.rarity);
+    const hasNonR = rarities.some(r => r !== 'R');
+    expect(hasNonR).toBe(true);
   });
 });

@@ -1,4 +1,5 @@
 import { state, updateCardCounts } from './state.js';
+import { sharePoster } from './share.js';
 
 async function vote(cardId, kind) {
   const r = await fetch('/api/vote', {
@@ -10,38 +11,52 @@ async function vote(cardId, kind) {
   return r.json();
 }
 
-export function renderCard(root, card, { onShare, onDrawAgain, onPokedex }) {
-  const live = state.cards.find(c => c.id === card.id) || card;
-
+export function renderCard(root, card, { onBack, onAgain, onPokedex }) {
   function paint() {
-    const fresh = state.cards.find(c => c.id === card.id) || live;
+    const fresh = state.cards.find(c => c.id === card.id) || card;
+    const r = card.rarity.toLowerCase();
+
     root.innerHTML = `
-      <div class="card-page">
-        <div class="card ${card.rarity.toLowerCase()}">
+      <div class="card-detail">
+        <div class="card-detail-top">
+          <button id="share-btn" class="icon-btn share" title="分享">📤</button>
+          <button id="back-btn" class="icon-btn close" title="返回">✕</button>
+        </div>
+
+        <div class="card r-${r}">
           <div class="rarity-badge">${card.rarity}</div>
           <div class="card-art">${card.emoji ?? '🃏'}</div>
           <h2 class="card-name">${card.name}</h2>
           <p class="card-role">${card.role === 'leader' ? '出战领导' : '出战同事'}</p>
-          <blockquote class="card-quote">“${card.quote}”</blockquote>
+          <blockquote class="card-quote">"${card.quote}"</blockquote>
           <p class="card-desc">${card.desc}</p>
-          <div class="vote-stats">
-            <span class="stat like">👍 ${fresh.likes_count ?? 0}</span>
-            <span class="stat dread">🚫 ${fresh.dreads_count ?? 0}</span>
-          </div>
         </div>
-        <div class="actions">
-          <button id="like-btn" class="vote-btn vote-like">这就是我的领导 👍</button>
-          <button id="dread-btn" class="vote-btn vote-dread">我无法承受（重抽） 🚫</button>
-          <button id="again-btn">再抽一张</button>
-          <button id="share-btn">分享这张卡</button>
-          <button id="pokedex-btn" class="ghost-inline">查看卡池进度</button>
+
+        <div class="card-stats">
+          <button class="stat like" id="like-btn" title="这就是我的领导">
+            <span class="emoji">👍</span><span class="num">${fresh.likes_count ?? 0}</span>
+          </button>
+          <button class="stat dread" id="dread-btn" title="我无法承受">
+            <span class="emoji">😭</span><span class="num">${fresh.dreads_count ?? 0}</span>
+          </button>
+          <button class="stat refresh" id="again-btn" title="再抽一轮">
+            <span class="emoji">🔄</span>
+          </button>
         </div>
+
+        <button class="pokedex-link" id="pokedex-btn">📦 查看卡包 →</button>
       </div>
     `;
+
+    root.querySelector('#share-btn').addEventListener('click', () => sharePoster(card));
+    root.querySelector('#back-btn').addEventListener('click', onBack);
+    root.querySelector('#pokedex-btn').addEventListener('click', onPokedex);
+    root.querySelector('#again-btn').addEventListener('click', onAgain);
 
     root.querySelector('#like-btn').addEventListener('click', async (e) => {
       const btn = e.currentTarget;
       btn.disabled = true;
+      btn.classList.add('pulse');
       try {
         const updated = await vote(card.id, 'like');
         updateCardCounts(card.id, updated);
@@ -49,25 +64,24 @@ export function renderCard(root, card, { onShare, onDrawAgain, onPokedex }) {
       } catch (err) {
         alert('点赞失败：' + err.message);
         btn.disabled = false;
+        btn.classList.remove('pulse');
       }
     });
 
     root.querySelector('#dread-btn').addEventListener('click', async (e) => {
       const btn = e.currentTarget;
       btn.disabled = true;
+      btn.classList.add('pulse');
       try {
         const updated = await vote(card.id, 'dread');
         updateCardCounts(card.id, updated);
-        onDrawAgain();
+        paint();
       } catch (err) {
-        alert('重抽失败：' + err.message);
+        alert('操作失败：' + err.message);
         btn.disabled = false;
+        btn.classList.remove('pulse');
       }
     });
-
-    root.querySelector('#again-btn').addEventListener('click', onDrawAgain);
-    root.querySelector('#share-btn').addEventListener('click', () => onShare(card));
-    root.querySelector('#pokedex-btn').addEventListener('click', onPokedex);
   }
 
   paint();
