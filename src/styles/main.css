@@ -1,0 +1,29 @@
+body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; background: #0f0f17; color: #f0f0f0; }
+#app { max-width: 640px; margin: 0 auto; padding: 24px; min-height: 100vh; }
+
+.home { text-align: center; padding: 48px 0; }
+.title { font-size: 32px; line-height: 1.25; margin: 16px 0 8px; }
+.sub { opacity: 0.7; margin-bottom: 32px; }
+.primary { padding: 14px 32px; font-size: 17px; border: 0; border-radius: 999px; background: linear-gradient(90deg, #ff7eb3, #9f7aea); color: #fff; cursor: pointer; }
+.primary:hover { filter: brightness(1.08); }
+.ghost { display: block; margin: 18px auto 0; padding: 10px 20px; background: transparent; color: #aaa; border: 1px solid #333; border-radius: 999px; cursor: pointer; }
+
+.quiz { padding: 24px 0; }
+.quiz .progress { opacity: 0.6; font-size: 13px; margin-bottom: 12px; }
+.quiz .question { font-size: 22px; margin: 8px 0 24px; }
+.quiz .options { display: flex; flex-direction: column; gap: 12px; }
+.quiz .opt { padding: 14px; font-size: 15px; border-radius: 10px; border: 1px solid #333; background: #1a1a2e; color: #fff; cursor: pointer; text-align: left; }
+.quiz .opt:hover { background: #22223a; border-color: #666; }
+
+.pokedex { padding: 16px 0; }
+.pokedex h2 { margin: 8px 0; }
+.progress-text { opacity: 0.75; margin-bottom: 16px; }
+.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.cell { padding: 10px; border-radius: 10px; text-align: center; background: #1a1a2e; border: 1px solid #333; }
+.cell.locked { opacity: 0.4; }
+.cell.ssr.owned { border-color: #ffd76a; box-shadow: 0 0 10px rgba(255,215,106,0.5); }
+.cell.sr.owned  { border-color: #b9a8ff; }
+.cell-art { font-size: 36px; }
+.cell-name { font-size: 13px; margin-top: 4px; }
+.cell-rarity { font-size: 10px; opacity: 0.6; letter-spacing: 1px; }
+#back-btn { background: transparent; color: #aaa; border: none; cursor: pointer; font-size: 14px; padding: 4px 0; }
