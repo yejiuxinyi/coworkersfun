@@ -1,0 +1,19 @@
+{
+  "name": "coworkersfun",
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "deploy:preview": "npm run build && vite preview --port 4173"
+  },
+  "devDependencies": {
+    "vite": "^5.4.0",
+    "vitest": "^2.0.0"
+  },
+  "dependencies": {
+    "html2canvas": "^1.4.1"
+  }
+}
