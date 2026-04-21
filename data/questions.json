@@ -1,0 +1,60 @@
+[
+  {
+    "id": "Q1",
+    "text": "你的星座是？",
+    "options": [
+      { "label": "白羊", "luck": 1, "tags": ["fire_sign"] },
+      { "label": "狮子", "luck": 1, "tags": ["fire_sign"] },
+      { "label": "射手", "luck": 1, "tags": ["fire_sign"] },
+      { "label": "金牛", "luck": 0, "tags": ["earth_sign"] },
+      { "label": "处女", "luck": 0, "tags": ["earth_sign"] },
+      { "label": "摩羯", "luck": 0, "tags": ["earth_sign"] },
+      { "label": "双子", "luck": 0, "tags": ["air_sign"] },
+      { "label": "天秤", "luck": 0, "tags": ["air_sign"] },
+      { "label": "水瓶", "luck": 0, "tags": ["air_sign"] },
+      { "label": "巨蟹", "luck": -1, "tags": ["water_sign"] },
+      { "label": "天蝎", "luck": -1, "tags": ["water_sign"] },
+      { "label": "双鱼", "luck": -1, "tags": ["water_sign"] }
+    ]
+  },
+  {
+    "id": "Q2",
+    "text": "昨天股票/基金状态？",
+    "options": [
+      { "label": "亏麻了", "luck": -2, "tags": ["unlucky"] },
+      { "label": "微赚", "luck": 1, "tags": ["lucky"] },
+      { "label": "没买是唯一赢家", "luck": 0, "tags": [] },
+      { "label": "装死没看", "luck": -1, "tags": [] }
+    ]
+  },
+  {
+    "id": "Q3",
+    "text": "最近一周有没有人跟你表白？",
+    "options": [
+      { "label": "有！还挺开心的", "luck": 2, "tags": ["loved"] },
+      { "label": "我跟别人表白了", "luck": 1, "tags": ["loved"] },
+      { "label": "没有，又是孤独的一周", "luck": -1, "tags": [] },
+      { "label": "不想谈，烦", "luck": -1, "tags": [] }
+    ]
+  },
+  {
+    "id": "Q4",
+    "text": "昨天有没有吃到好吃的？",
+    "options": [
+      { "label": "吃到了，爱生活", "luck": 2, "tags": ["foodie"] },
+      { "label": "勉强吃饱", "luck": 0, "tags": [] },
+      { "label": "忘了吃啥了", "luck": -1, "tags": [] },
+      { "label": "减肥中不敢吃", "luck": -1, "tags": [] }
+    ]
+  },
+  {
+    "id": "Q5",
+    "text": "今天的心情量化一下？",
+    "options": [
+      { "label": "今天是好日子", "luck": 2, "tags": ["good_day"] },
+      { "label": "还行", "luck": 0, "tags": [] },
+      { "label": "麻了", "luck": -1, "tags": [] },
+      { "label": "想辞职", "luck": -2, "tags": [] }
+    ]
+  }
+]
