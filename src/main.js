@@ -4,10 +4,14 @@ import { renderQuiz } from './quiz.js';
 import { renderCard } from './card.js';
 import { renderPokedex } from './pokedex.js';
 import { sharePoster } from './share.js';
+import { renderAdmin } from './admin.js';
 
 const app = document.getElementById('app');
 
 function renderHome() {
+  if (location.hash) {
+    history.replaceState(null, '', location.pathname + location.search);
+  }
   app.innerHTML = `
     <div class="home">
       <h1 class="title">今天你会遇到<br/>什么老板/同事？</h1>
@@ -36,8 +40,26 @@ function onQuizDone(answers) {
   });
 }
 
+function route() {
+  if (location.hash === '#/admin') {
+    renderAdmin(app, () => {
+      location.hash = '';
+      renderHome();
+    });
+  } else {
+    renderHome();
+  }
+}
+
+window.addEventListener('hashchange', route);
+
 (async function init() {
   app.innerHTML = '<p>加载中…</p>';
-  await loadData();
-  renderHome();
+  try {
+    await loadData();
+  } catch (err) {
+    app.innerHTML = `<div class="home"><h2>加载失败</h2><p>${err.message}</p><p>请检查后端服务是否启动。</p></div>`;
+    return;
+  }
+  route();
 })();
