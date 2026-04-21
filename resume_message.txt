@@ -1,0 +1,13 @@
+coworkersfun 项目恢复入口（2026-04-21 暂停）
+
+当前状态：代码全部完成并推送 GitHub（https://github.com/yejiuxinyi/coworkersfun）
+正在做：v2 部署 — Supabase 已建项目，等用户在 SQL Editor 跑 db/schema.sql + db/seed.sql，然后 Vercel 连 repo 填 4 个环境变量。
+
+详情看 docs/HANDOFF.md
+下一步恢复点：
+1. 问用户 Supabase schema/seed 是否跑完
+2. 若完成 → 引导配置 Vercel（4 个 env vars）+ deploy
+3. 若没 → 继续指引 Supabase SQL Editor 路径和操作
+4. 部署完成后做线上 E2E 验证：首页抽卡、👍/🚫 计数、/#/admin 登录 (密码 13579)、编辑卡牌
+
+未做但已代码就绪：线上 E2E 验证 / UI 优化迭代
