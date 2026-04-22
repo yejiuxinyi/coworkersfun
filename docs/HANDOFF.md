@@ -1,102 +1,171 @@
-0421
+0423
 
-# coworkersfun · 会话交接档（2026-04-21）
+# coworkersfun · 会话交接档（2026-04-23）
 
 ## 一句话状态
 
-代码全部完成，master 分支 10 个 commit 已推 GitHub。**阻塞在用户手动部署环节**：Supabase 要跑 2 个 SQL，Vercel 要连 repo + 填 4 个环境变量。
+**v3 demo 已部署到 Vercel 线上，功能全通，等用户反馈 + 挑美术风格**。
 
-## 仓库
+线上：**https://coworkersfun.vercel.app**
+仓库：https://github.com/yejiuxinyi/coworkersfun（HEAD = `3f9b189`）
 
-- 位置：`E:\cursor\ProjectsForPrac\coworkersfun`（独立 git repo，不属于外层 E:\cursor\）
-- GitHub：https://github.com/yejiuxinyi/coworkersfun（public）
-- 分支：master
-- git 身份：每次 commit 用 `git -c user.email=xief5345@gmail.com -c user.name=yejiuxinyi`（不要写入 local/global config）
+---
 
-## 已交付
+## 历代版本进展
 
-| 功能 | 文件 | 状态 |
+| 版本 | 交付 | 状态 |
 |---|---|---|
-| v1 抽卡算法（TDD） | `src/draw.js`, `tests/draw.test.js` | 11/11 specs 绿 |
-| v1 前端全链路 | `src/{main,state,quiz,card,pokedex,share}.js`, `src/styles/` | build 成功 |
-| v1 卡池数据 | `data/questions.json`, `data/cards.json`（48 张 R36/SR8/SSR4） | — |
-| v2 DB | `db/schema.sql`（含 `increment_vote` RPC）, `db/seed.sql`（自动生成） | 未跑 |
-| v2 API | `api/cards.js`, `api/vote.js`, `api/admin/login.js`, `api/admin/card.js` | 代码就绪 |
-| v2 Helper | `api/_db.js`（Supabase + mock）, `api/_session.js`（HMAC cookie） | 4 specs 绿 |
-| v2 前端 | `src/admin.js`, `src/card.js` 改 + 样式 | build 成功 |
-| 部署配置 | `vercel.json`, `.env.example`, `README.md` | 就绪 |
+| **v1** | TDD 抽卡算法 + 5题问答 + 48张卡 + Pokedex + 分享 | ✅ 已部署 |
+| **v2** | 👍/🚫 计数后端 + Supabase 持久化 + `/#/admin` 管理员 + HMAC session | ✅ 已部署并验证 |
+| **v3** | 5 连盲盒抽卡 + 翻牌特效（R白/SR紫/SSR金+confetti）+ 卡面新布局 + 赛博卡通视觉 + 狗头卡背 SVG | ✅ 已部署，等用户测 |
 
-测试：`npm test` → 15/15 通过（11 draw + 4 session）
-构建：`npm run build` → 成功（~400ms）
+## 仓库信息
 
-## 用户手动待办
+- 位置：`E:\cursor\ProjectsForPrac\coworkersfun`（独立 git repo）
+- GitHub：https://github.com/yejiuxinyi/coworkersfun（public）
+- 分支：master（18 个 commit）
+- git 身份注入（不写入 config）：
+  ```
+  git -c user.email=xief5345@gmail.com -c user.name=yejiuxinyi commit -m ...
+  ```
 
-### 1. Supabase（用户在 Supabase 新建了项目但找不到 SQL Editor）
+## 线上部署
 
-- 左侧导航 `</>`  "SQL Editor" 图标，或 `https://supabase.com/dashboard/project/<project-ref>/sql/new`
-- 粘 `db/schema.sql` → Run → 建表 + RPC
-- 新建查询粘 `db/seed.sql` → Run → 插入 48 张卡
-- 到 Settings → API，记下：
-  - `Project URL`（后面填 `SUPABASE_URL`）
-  - `service_role` secret（后面填 `SUPABASE_SERVICE_ROLE_KEY`，**不是 anon key**）
+- Vercel 项目：`coworkersfun`，托管在 `yejiuxinyi` 账户
+- Supabase 项目 ref：`olvdrfdulnfndvfmrzue`（SQL + 48 行 seed 数据都已跑过）
+- Vercel 环境变量已填（SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY / ADMIN_PASSWORD=13579 / ADMIN_SECRET）
+- push 到 master 会自动触发 Vercel 重新部署，约 1 分钟
 
-### 2. Vercel
+**用户**明确说 service_role key 不 rotate（他说没风险）。
 
-- https://vercel.com/new → Import `yejiuxinyi/coworkersfun`
-- Environment Variables 加 4 个：
-  - `SUPABASE_URL` = Supabase Project URL
-  - `SUPABASE_SERVICE_ROLE_KEY` = Supabase service_role key
-  - `ADMIN_PASSWORD` = `13579`
-  - `ADMIN_SECRET` = 任意随机长字符串（HMAC 签名用）
-- Deploy → 得到 `https://coworkersfun*.vercel.app`
+## 技术栈
 
-### 3. 线上 E2E 验证
+- Vite 5 + 原生 JS（前端 SPA）
+- Vercel Serverless Functions（`api/*.js`）
+- Supabase Postgres（数据库）
+- `@supabase/supabase-js`、`html2canvas`
+- vitest（18 个测试：11 draw + 3 drawFive + 4 session）
 
-1. 打开首页 → 抽卡
-2. 点 👍 → 计数 +1
-3. 点 🚫 → 计数 +1 + 自动重抽
-4. 浏览器开隐身窗口访问同一 URL，看到的是**累计后**计数（证明确实持久化）
-5. `/#/admin` → 输 `13579` → 表格显示 48 张卡 + 排序 + 编辑
-6. 改一张卡的 quote → 保存 → 回首页抽到看新文案
+## API 速记
 
-## 下次会话恢复要点
+```
+GET   /api/cards                48 张卡 + likes_count/dreads_count
+POST  /api/vote                 {cardId, kind: like|dread} → 原子递增
+POST  /api/admin/login          {password} → Set-Cookie admin_session (HMAC, 2h)
+PATCH /api/admin/card           {id, name?, quote?, desc?, emoji?} → session 校验
+```
 
-1. **先问**：Supabase SQL 跑完没？Vercel 连好了没？
-2. **若还没 Supabase**：重复指引 SQL Editor 路径
-3. **若 Supabase OK Vercel 没搞**：走上面 2
-4. **若都 OK 部署完成**：引导 E2E，出问题看 Vercel Functions logs
-5. **后续任务方向**（用户原话）：
-   - UI 继续优化（v1 做完时用户说"后续要优化前端ui和功能设置"）
-   - 可能加稀有度特效、抽卡动画、分享海报美化
-6. **不要**：重建 v1/v2 基础结构（已稳定）；改后端架构（用户已确认 Vercel+Supabase 方案）
+`api/_db.js` 有 `isMock()` 分支 — 当 `SUPABASE_URL` 为空时走内存 mock。
+
+## v3 关键设计
+
+- **drawFive** (`src/draw.js`)：独立抽 5 张 + 保底（5 张全 R 强制替换 1 张为 SR/SSR）
+- **Reveal 页** (`src/reveal.js`)：5 张卡背纵向堆叠，点击 3D rotateY 翻面，按稀有度分级光效
+- **翻牌特效** (`src/styles/reveal.css`)：
+  - R：`filter: drop-shadow` 白光一闪
+  - SR：紫光 + 紫色余辉
+  - SSR：金光 + confetti 粒子（`fireConfetti()` DOM 注入）
+- **Card 详情**：分享图标左上、计数按钮本身可点（👍/😭/🔄）
+- **视觉**：米黄底 + 黑粗描边 + 厚纸板 box-shadow + 孟菲斯几何点缀
+- **localStorage** 保存当前 5 连进度（离开后回来能续看，有"回到上一组 5 连"按钮）
+
+## 下次恢复要点（优先级排序）
+
+### 1. 先问用户：v3 demo 试了吗？
+
+- 如果试了 → 问哪里不对（视觉/交互/某张卡）→ 小改
+- 如果没试 → 引导打开 https://coworkersfun.vercel.app 手机上玩一玩
+
+### 2. 挑美术风格
+
+文档在 `docs/0422-v3-美术风格选项.md`，让用户答两行：
+```
+卡面角色 = [A 扁平Q版 / B 线稿彩 / C 棍人 / D 像素]
+Doge 卡背 = [1 meme原图 / 2 重绘 / 3 几何 / 4 烫金]
+```
+
+**我的推荐**：A + 3 无缝升级 / C + 1 最有传播力
+
+### 3. 真美术生成
+
+选定后的下一步：
+- 整理 48 张人物 + 1 张卡背的 Midjourney/imagen-3 prompt
+- 如果用户授权我调图像 API → 直接生成
+- 否则 → 给 prompt 让用户自己去 MJ
+- 生成后塞 `public/assets/cards/{id}.webp` 和 `public/assets/back.png`
+- 前端卡面 emoji 替换成 `<img>`
+
+### 4. 题库修改
+
+用户说自己改 `data/questions.json`。字段结构：
+```json
+{
+  "id": "Q1",
+  "text": "题干",
+  "options": [
+    { "label": "显示文字", "luck": 1, "tags": ["fire_sign"] }
+  ]
+}
+```
+- luck：-2 到 +2（影响稀有度池）
+- tags：触发命定卡（目前只有 SSR001 圣诞老人要求 5 tag 命中）
+
+用户想加 0-999 数字题（推迟到下一轮，用户原话"LUX 以后再做"）。
+
+### 5. 用户明确推迟的功能
+
+- luck 加权规则（圣诞老人命定路径保留在代码里，但 5 连抽时暂不强化这条路径）
+- 数字题（0-999）
+- 题库完整重写（用户自己改，我不帮改）
+
+## 不要做的事
+
+- ❌ 重建 v1/v2/v3 基础结构（已稳定）
+- ❌ 改后端架构（Vercel + Supabase 已确认）
+- ❌ 主动 rotate service_role key（用户说没风险）
+- ❌ 没授权就 push 或做大改动
+
+## 关键路径速查
+
+```
+src/draw.js          drawCard, drawFive, isDestinedHit, computeRarityPool
+src/reveal.js        5 张翻牌页面（SVG Doge 卡背 + 翻转 + confetti）
+src/card.js          单卡详情（新 3 按钮布局）
+src/main.js          route: home → quiz → reveal → card
+src/styles/main.css  赛博卡通基础配色
+src/styles/reveal.css 翻牌 3D + 稀有度光效 keyframes
+src/styles/card.css  单卡详情布局
+src/styles/admin.css 后台黄表头
+api/cards.js         GET 全量卡
+api/vote.js          POST 递增 (RPC increment_vote)
+api/admin/login.js   密码 → HMAC cookie
+api/admin/card.js    PATCH 卡牌字段（session 校验）
+api/_db.js           Supabase 客户端 + mock 分支
+api/_session.js      HMAC 签发/验证
+db/schema.sql        建表 + RPC 函数
+db/seed.sql          48 行 upsert（自动生成，scripts/gen-seed.js）
+docs/0422-v3-美术风格选项.md  美术选型待决策
+```
 
 ## 设计 & 计划文档
 
-- 设计：`docs/superpowers/specs/0419-coworkers-card-draw-design.md`（v1），`docs/superpowers/specs/0421-v2-likes-admin-backend.md`（v2）
-- 计划：`docs/superpowers/plans/0419-coworkers-card-draw-mvp.md`（v1），`docs/superpowers/plans/0421-v2-likes-admin-backend.md`（v2）
-- 用户原始意图：`意图输入1.txt`, `意图输入2.txt`
+- **v1 设计**：`docs/superpowers/specs/0419-coworkers-card-draw-design.md`
+- **v1 计划**：`docs/superpowers/plans/0419-coworkers-card-draw-mvp.md`
+- **v2 设计**：`docs/superpowers/specs/0421-v2-likes-admin-backend.md`
+- **v2 计划**：`docs/superpowers/plans/0421-v2-likes-admin-backend.md`
+- **架构原理**（写给小白的解释）：`docs/0421-架构原理解释.md`
+- **v3 需求**：`docs/0421-v3-需求整理与决策点.md`
+- **v3 美术选型**：`docs/0422-v3-美术风格选项.md`
 
-## 架构速记
+## 用户原始意图（时间线）
 
-```
-浏览器
-  ├─ /api/cards             GET    cards + counts
-  ├─ /api/vote              POST   {cardId, kind: like|dread}
-  ├─ /api/admin/login       POST   {password} → Set-Cookie HMAC
-  └─ /api/admin/card        PATCH  session-gated edit
-       ↓
-Vercel Functions (Node ESM, api/*.js)
-       ↓ service_role key
-Supabase Postgres (cards 表 + increment_vote RPC)
-```
+- `意图输入1.txt`：最初想法（SBTI + 职场抽卡）
+- `意图输入2.txt`：v1 调整（MVP + 玄学问题 + 随机+逻辑）
+- `意图输入3.txt`：v3 大改（手机长条 + 5 连 + 翻牌特效 + 按钮重组 + 卡背 Doge + 小人形象）
+- `意图输入4.txt`：v3 决策（赛博卡通 + B 保底 + 翻倍特效 + 先做 demo）
 
-- `SUPABASE_URL` 为空时所有 API 走 `api/_db.js` 的 `mockDb`（内存，重启清零）
-- Admin session 是 `base64(expiry).hmac(expiry, ADMIN_SECRET)`，2 小时 TTL
-- 无用户去重：同一人可无限次点赞/重抽
+## 遗留/已知问题
 
-## 已知遗留
-
-- 没做线上 E2E（用户还没部署完）
-- 没做浏览器真机 E2E 测试（v1 时用户自己测过基础功能）
-- UI 还有优化空间（用户在 v2 提出要求时就说"后续要优化"）
-- GitHub OAuth token 没 `workflow` scope —— 未来如果要再加 `.github/workflows/` 需先：`gh auth refresh -h github.com -s workflow`
+- GitHub OAuth token 缺 `workflow` scope（要加 `.github/workflows/` 需 `gh auth refresh -h github.com -s workflow`）
+- `credential-manager-core is not a git command` 警告 — git push 能成功但末尾有噪声，不影响功能
+- v3 demo 没做真机浏览器 E2E 自动测试（靠用户手动）
